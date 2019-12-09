@@ -1,0 +1,19 @@
+{
+  "name": "cdq_task-list-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "author": "Julia Zajusz",
+  "license": "MIT",
+  "scripts": {
+    "test": "test",
+    "start": "node app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/JuliaZajusz/cdq_task-list-api.git"
+  },
+  "dependencies": {
+    "express": "^4.17.1"
+  }
+}
