@@ -12,4 +12,7 @@ module.exports = function(app) {
     .get(personList.read_a_person)
     .put(personList.update_a_person)
     .delete(personList.delete_a_person);
+
+  app.route('/people/:personId/tasks')
+    .get(personList.list_all_person_tasks);
 };

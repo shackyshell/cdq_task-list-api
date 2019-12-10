@@ -1,7 +1,8 @@
 'use strict';
 
-const mongoose = require('mongoose'),
-  Person = mongoose.model('Person');
+const mongoose = require('mongoose');
+const Person = mongoose.model('Person');
+const Task = mongoose.model('Task');
 
 exports.list_all_persons = function(req, res) {
   Person.find({}, function(err, person) {
@@ -44,6 +45,21 @@ exports.delete_a_person = function(req, res) {
     if (err)
       res.send(err);
     res.json({ message: 'Person successfully deleted' });
+  });
+};
+
+exports.list_all_person_tasks = function (req, res) {
+  const personId = req.params.personId;
+  Task.find({assignee: personId}, function (err, tasks) {
+    if (err)
+      res.send(err);
+    let result = {
+      tasks,
+      sum_tasks: tasks.reduce((prvVal, currVal) => {
+        return prvVal + currVal.size
+      }, 0)
+    };
+    res.json(result);
   });
 };
 

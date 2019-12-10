@@ -40,6 +40,12 @@ exports.read_a_task = function(req, res) {
   });
 };
 
+// Person.findById(task.assignee, function(err, person) {
+//   if (!err){
+//     task.assignee = person;
+//     console.log('tu' + task);
+//   }
+// });
 
 exports.update_a_task = function(req, res) {
   const new_task = new Task(req.body);
