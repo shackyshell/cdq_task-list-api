@@ -9,8 +9,11 @@ const PersonSchema = new Schema({
   },
   capacity: {
     type: Number,
-    default: 0 //TODO less or equal to 40
+    default: 0,
+    min: 0,
+    max: [40, 'Too large capacity']
   }
-});
+  })
+;
 
 module.exports = mongoose.model('Person', PersonSchema);
