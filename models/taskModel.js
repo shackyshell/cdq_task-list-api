@@ -1,8 +1,6 @@
-
 'use strict';
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-
 
 const TaskSchema = new Schema({
   name: {
@@ -18,8 +16,8 @@ const TaskSchema = new Schema({
     default: 0 //TODO
   },
   assignee: {
-    type: String  //TODO
-    // type: Person
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Person'
   },
 });
 

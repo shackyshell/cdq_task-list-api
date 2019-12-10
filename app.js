@@ -7,8 +7,8 @@ const express = require('express'),
   port = process.env.PORT || 3000,
   mongoose = require('mongoose'),
   //create model
-  Task = require('./models/taskModel'), //TODO move
   Person = require('./models/personModel'),
+  Task = require('./models/taskModel'), //TODO move
   bodyParser = require('body-parser');
 
 // mongoose instance connection url connection

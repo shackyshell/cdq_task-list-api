@@ -6,7 +6,7 @@
   "author": "Julia Zajusz",
   "license": "MIT",
   "scripts": {
-    "test": "test",
+    "test": "mocha --require @babel/register",
     "start": "nodemon --exec babel-node app"
   },
   "repository": {
@@ -23,7 +23,11 @@
     "@babel/core": "^7.7.5",
     "@babel/node": "^7.7.4",
     "@babel/preset-env": "^7.7.6",
+    "@babel/register": "^7.7.4",
     "@types/mongoose": "^5.5.32",
+    "chai": "^4.2.0",
+    "chai-http": "^4.3.0",
+    "mocha": "^6.2.2",
     "nodemon": "^2.0.1"
   }
 }
