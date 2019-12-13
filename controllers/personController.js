@@ -57,7 +57,8 @@ exports.list_all_persons_tasks = async function (req, res) {
     for (let i = 0; i < persons.length; i++) {
       const personId = persons[i]._id;
       let personWithTasks = persons[i];
-      let personTasks = await Task.find({assignee: personId}, function (err, tasks) {
+      let person_tasks = {};
+      await Task.find({assignee: personId}, function (err, tasks) {
         if (err)
           res.send(err);
         let personTasks = {
@@ -66,11 +67,11 @@ exports.list_all_persons_tasks = async function (req, res) {
             return prvVal + currVal.size
           }, 0)
         };
-        personWithTasks.tasks = personTasks;
+        person_tasks = personTasks;
         return personTasks;
       })
         .select('size status name');
-      peopleWithTasks.push({...personWithTasks.toObject(), tasks: personTasks});
+      peopleWithTasks.push({...personWithTasks.toObject(), person_tasks: person_tasks});
     }
     res.json(peopleWithTasks);
   })
