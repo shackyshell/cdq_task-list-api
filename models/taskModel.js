@@ -13,7 +13,8 @@ const TaskSchema = new Schema({
   },
   size: {
     type: Number,
-    default: 0 //TODO
+    default: 0,
+    min: 0
   },
   assignee: {
     type: mongoose.Schema.Types.ObjectId,

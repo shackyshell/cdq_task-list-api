@@ -2,7 +2,6 @@
 module.exports = function(app) {
   const personList = require('../controllers/personController');
 
-  // todoList Routes
   app.route('/people')
     .get(personList.list_all_persons)
     .post(personList.create_a_person);
