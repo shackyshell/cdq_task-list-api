@@ -48,7 +48,35 @@ exports.delete_a_person = function (req, res) {
   });
 };
 
-exports.list_all_person_tasks = function (req, res) {
+exports.list_all_persons_tasks = async function (req, res) {
+  let peopleWithTasks = [];
+  await Person.find({}, async function (err, persons) {
+    if (err)
+      res.send(err);
+
+    for (let i = 0; i < persons.length; i++) {
+      const personId = persons[i]._id;
+      let personWithTasks = persons[i];
+      let personTasks = await Task.find({assignee: personId}, function (err, tasks) {
+        if (err)
+          res.send(err);
+        let personTasks = {
+          tasks,
+          sum_tasks: tasks.reduce((prvVal, currVal) => {
+            return prvVal + currVal.size
+          }, 0)
+        };
+        personWithTasks.tasks = personTasks;
+        return personTasks;
+      })
+        .select('size status name');
+      peopleWithTasks.push({...personWithTasks.toObject(), tasks: personTasks});
+    }
+    res.json(peopleWithTasks);
+  })
+};
+
+exports.list_person_tasks = function (req, res) {
   const personId = req.params.personId;
   Task.find({assignee: personId}, function (err, tasks) {
     if (err)
@@ -69,10 +97,9 @@ export async function getPersonOccupation(personId) {
       if (err) {
         throw SQLException;
       }
-      let occupation = tasks.reduce((prvVal, currVal) => {
+    person_occupation = tasks.reduce((prvVal, currVal) => {
         return prvVal + currVal.size
-      }, 0);
-      person_occupation = occupation
+    }, 0)
     }
   );
   return person_occupation;
