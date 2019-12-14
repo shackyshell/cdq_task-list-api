@@ -1,5 +1,8 @@
 'use strict';
 
+import {logger} from "../logger";
+import {shuffleOpenTasks} from "./taskController";
+
 const mongoose = require('mongoose');
 const Person = mongoose.model('Person');
 const Task = mongoose.model('Task');
@@ -22,20 +25,27 @@ exports.create_a_person = function (req, res) {
 };
 
 exports.read_a_person = function (req, res) {
+
   Person.findById(req.params.personId, function (err, person) {
     if (err)
       res.send(err);
+    logger.log({level: 'info', message: 'Person found', person: person});
     res.json(person);
   });
 };
 
 exports.delete_a_person = function (req, res) {
-  Person.remove({
+  Person.deleteOne({
     _id: req.params.personId
   }, function (err, person) {
-    if (err)
-      res.send(err);
-    res.json({message: 'Person successfully deleted'});
+    if (err) res.send(err);
+    try {
+      shuffleOpenTasks().then(() => {
+        res.json({message: 'Person successfully deleted'});
+      })
+    } catch (err) {
+      logger.log({level: 'error', message: 'shuffle tasks error', error: err});
+    }
   });
 };
 

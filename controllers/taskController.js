@@ -93,7 +93,7 @@ exports.update_a_task = function (req, res) {
     res.send('size is not a Fibonacci number');
     return;
   }
-  Task.useFindAndModify({_id: req.params.taskId}, req.body, {new: true}, function (err, task) {
+  Task.findOneAndUpdate({_id: req.params.taskId}, req.body, {new: true}, function (err, task) {
     if (err)
       res.send(err);
     res.json(task);
@@ -125,11 +125,11 @@ export const shuffleOpenTasks = async () => {
     const personWithLastCapacity = {...all_people[i].toObject(), capacity: all_people[i].capacity - uc, uc: uc};
     all_people_with_last_capacity.push(personWithLastCapacity)
   }
-  // console.log(all_people_with_last_capacity);
+  console.log(all_people_with_last_capacity);
   let S = greedyMKP(all_tasks, all_people_with_last_capacity);
-  // console.log(S);
+  console.log(S);
   for (let i = 0; i < S.length; i++) {
-    Task.useFindAndModify({_id: S[i]._id}, S[i], {new: true}, function (err, task) {
+    Task.findOneAndUpdate({_id: S[i]._id}, S[i], {new: true}, function (err, task) {
       if (err) throw err;
     });
   }
