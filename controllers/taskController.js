@@ -2,7 +2,7 @@
 
 
 import {greedyMKP, isFibonacci} from "./teskUtils";
-import {getPersonOccupation} from "./personController";
+import {getPersonOccupation, getPersonUsedCapacity} from "./personController";
 import * as _ from 'lodash'
 
 const mongoose = require('mongoose');
@@ -104,14 +104,18 @@ exports.shuffle_open_tasks = async function (req, res) {
     if (err)
       res.send(err);
   });
-  let S = greedyMKP(all_tasks, all_people);
+
+  const all_people_with_last_capacity = [];
+  for (let i = 0; i < all_people.length; i++) {
+    let uc = await getPersonUsedCapacity(all_people[i]._id);
+    const personWithLastCapacity = {...all_people[i].toObject(), capacity: all_people[i].capacity - uc, uc: uc};
+    all_people_with_last_capacity.push(personWithLastCapacity)
+  }
+  let S = greedyMKP(all_tasks, all_people_with_last_capacity);
   for (let i = 0; i < S.length; i++) {
-    // console.log(i);
-    // console.log(S[i]);
     Task.findOneAndUpdate({_id: S[i]._id}, S[i], {new: true}, function (err, task) {
       if (err)
         res.send(err);
-      // res.json(task);
     });
   }
   res.json(S);

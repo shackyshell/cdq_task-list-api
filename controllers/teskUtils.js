@@ -57,8 +57,9 @@ export const greedyMKP = (tasks, people) => {
   tasksCopy.sort((task1, task2) => task2.size - task1.size)
   for (let i = 0; i < tasks.length; i++) {
     for (let j = 0; j < people.length; j++) {
-      const sum = P[j].reduce((sum, task) => task.size, 0) + tasksCopy[i].size;
-      if (sum <= people[j].capacity) {
+      const sum = P[j].reduce((sum, task) => sum + task.size, 0) + tasksCopy[i].size;
+      let last_capacity = people[j].capacity - people[j].uc;
+      if (sum <= last_capacity) {
         P[j].push(tasksCopy[i]);
         break;
       }

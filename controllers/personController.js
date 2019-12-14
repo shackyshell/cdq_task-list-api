@@ -79,6 +79,14 @@ exports.list_all_persons_tasks = async function (req, res) {
   })
 };
 
+export const getPersonUsedCapacity = async (personId) => {
+  let tasks = await Task.find({assignee: personId, status: {$ne: "Open"}}, function (err, tasks) {
+  });
+  return tasks.reduce((prvVal, currVal) => {
+    return prvVal + currVal.size
+  }, 0);
+};
+
 exports.list_person_tasks = function (req, res) {
   const personId = req.params.personId;
   Task.find({assignee: personId}, function (err, tasks) {
