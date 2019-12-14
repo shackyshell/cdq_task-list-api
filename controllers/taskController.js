@@ -1,7 +1,9 @@
 'use strict';
 
 
-import {isFibonacci, setTaskAssignee, shuffleOpenTasks, tryToSetTaskAssignee} from "./teskUtils";
+import {isFibonacci} from "./isFibonacci";
+import {setTaskAssignee, shuffleOpenTasks, tryToSetTaskAssignee} from "./taskService";
+import {getPersonById, getPersonOccupation} from "./personController";
 
 const mongoose = require('mongoose');
 const Task = mongoose.model('Task');
@@ -54,12 +56,26 @@ exports.update_a_task = async function (req, res) {
     return;
   }
   await tryToSetTaskAssignee(new_task, new_task.assignee);
+  let oldTask = await Task.findById(req.params.taskId);
+  let assignee = await getPersonById(new_task.assignee);
+  let oldTaskSizeForNewAssignee = 0;
+  if (JSON.stringify(req.body.assignee) === JSON.stringify(oldTask.assignee)) {
+    oldTaskSizeForNewAssignee = oldTask.size;
+  }
+  if (assignee) {
+    let occupation = await getPersonOccupation(assignee._id);
+    if (new_task.size + occupation - oldTaskSizeForNewAssignee > assignee.capacity) {
+      new_task.status = "Open";
+      new_task.assignee = null;
+    }
+  }
   Task.findOneAndUpdate({_id: req.params.taskId}, new_task, {new: true}, function (err, task) {
     if (err)
       res.send(err);
     res.json(task);
   });
-};
+}
+;
 
 
 exports.delete_a_task = function (req, res) {
@@ -71,7 +87,6 @@ exports.delete_a_task = function (req, res) {
     res.json({message: 'Task successfully deleted'});
   });
 };
-
 
 
 exports.shuffle_open_tasks = async function (req, res) {

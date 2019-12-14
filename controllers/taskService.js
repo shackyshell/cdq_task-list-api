@@ -6,16 +6,6 @@ import {logger} from "../logger";
 const Person = mongoose.model('Person');
 const Task = mongoose.model('Task');
 
-export function isFibonacci(n) {
-  const a = (5 * Math.pow(n, 2) + 4);
-  const b = (5 * Math.pow(n, 2) - 4);
-
-  const result = Math.sqrt(a) % 1 === 0;
-  const res = Math.sqrt(b) % 1 === 0;
-
-  return result || res === true;
-}
-
 export const greedyMKP = (tasks, people, prioritarized_task) => {
   let tasksCopy = [...tasks];
   let P = [];
@@ -48,7 +38,6 @@ export const greedyMKP = (tasks, people, prioritarized_task) => {
       S[indexOf] = {...S[indexOf], assignee: people[j]._id}
     }
   }
-  // console.log(S);
   return S;
 };
 
@@ -133,17 +122,12 @@ export const tryToSetTaskAssignee = async (new_task, assigneeId) => {
   let person = await getPersonById(assigneeId);
   const occupation = await getPersonOccupation(person._id);
   let chosenPersonOccupation = {personId: person._id, occupation};
-  console.log(person);
   for (let i = 0; i < 2; i++) {
     const newOccupation = chosenPersonOccupation ? chosenPersonOccupation.occupation : null;
-    console.log('chosenPersonOccupation', person._id, chosenPersonOccupation, newOccupation <= person.capacity);
-    console.log('newOccupation', newOccupation, new_task.size);
     if (newOccupation && person && newOccupation <= person.capacity) {
-      console.log('if');
       new_task.assignee = chosenPersonOccupation.personId;
       break;
     } else {
-      console.log('else');
       try {
         await shuffleOpenTasks(new_task);
       } catch (err) {
@@ -153,9 +137,7 @@ export const tryToSetTaskAssignee = async (new_task, assigneeId) => {
       if (chosenPersonOccupation) {
         person = await getPersonById(chosenPersonOccupation.personId);
       }
-      if (new_task.status === "Open") {
-        new_task.assignee = null;
-      }
+      new_task.assignee = null;
     }
   }
 };
