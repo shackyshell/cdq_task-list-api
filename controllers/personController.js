@@ -105,3 +105,8 @@ export const getPersonOccupation = async (personId) => {
   return person_occupation;
 };
 
+export const getPersonCapacityById = async (personId) => {
+  return Person.findById(personId, async function (err, persons) {
+  }).select('capacity');
+};
+

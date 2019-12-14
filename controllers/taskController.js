@@ -2,7 +2,7 @@
 
 
 import {greedyMKP, isFibonacci} from "./teskUtils";
-import {getPersonOccupation, getPersonUsedCapacity} from "./personController";
+import {getPersonCapacityById, getPersonOccupation, getPersonUsedCapacity} from "./personController";
 import * as _ from 'lodash'
 
 const mongoose = require('mongoose');
@@ -50,16 +50,28 @@ exports.create_a_task = async function (req, res) {
     res.send('size is not a Fibonacci number');
     return;
   }
-  try {
-    const chosenPersonOccupation = await getLeastOccupiedPerson();
-    //TODO if(chosenPerosnOccupation + size > 40) {shuffle()}
-    new_task.assignee = chosenPersonOccupation.personId;
-  } catch (err) {
-    res.send(err);
+  let chosenPersonOccupation = null;
+  for (let i = 0; i < 2; i++) {
+    chosenPersonOccupation = await getLeastOccupiedPerson();
+    let person = await getPersonCapacityById(chosenPersonOccupation.personId);
+    if (chosenPersonOccupation.occupation + size > person.capacity) {
+      console.log('if');
+      try {
+        await shuffleOpenTasks();
+      } catch (err) {
+        console.log(err);
+      }
+      new_task.assignee = null;
+    } else {
+      console.log('else');
+      new_task.assignee = chosenPersonOccupation.personId;
+      break;
+    }
   }
   new_task.save(function (err, task) {
-    if (err)
+    if (err) {
       res.send(err);
+    }
     res.json(task);
   });
 };
@@ -81,7 +93,7 @@ exports.update_a_task = function (req, res) {
     res.send('size is not a Fibonacci number');
     return;
   }
-  Task.findOneAndUpdate({_id: req.params.taskId}, req.body, {new: true}, function (err, task) {
+  Task.useFindAndModify({_id: req.params.taskId}, req.body, {new: true}, function (err, task) {
     if (err)
       res.send(err);
     res.json(task);
@@ -90,7 +102,7 @@ exports.update_a_task = function (req, res) {
 
 
 exports.delete_a_task = function (req, res) {
-  Task.remove({
+  Task.deleteOne({
     _id: req.params.taskId
   }, function (err, task) {
     if (err)
@@ -113,12 +125,15 @@ export const shuffleOpenTasks = async () => {
     const personWithLastCapacity = {...all_people[i].toObject(), capacity: all_people[i].capacity - uc, uc: uc};
     all_people_with_last_capacity.push(personWithLastCapacity)
   }
+  // console.log(all_people_with_last_capacity);
   let S = greedyMKP(all_tasks, all_people_with_last_capacity);
+  // console.log(S);
   for (let i = 0; i < S.length; i++) {
-    Task.findOneAndUpdate({_id: S[i]._id}, S[i], {new: true}, function (err, task) {
+    Task.useFindAndModify({_id: S[i]._id}, S[i], {new: true}, function (err, task) {
       if (err) throw err;
     });
   }
+  console.log('exit shuffleOpenTasks');
   return S;
 
 };
