@@ -62,15 +62,17 @@ exports.list_all_persons_tasks = async function (req, res) {
         if (err)
           res.send(err);
         let personTasks = {
-          tasks,
+          // tasks,
+          all_tasks_amount: tasks.length,
+          open_tasks_amount: tasks.filter((task) => task.status === "Open").length,
           sum_tasks: tasks.reduce((prvVal, currVal) => {
             return prvVal + currVal.size
           }, 0)
         };
         person_tasks = personTasks;
-        return personTasks;
+        // return personTasks;
       })
-        .select('size status name');
+      // .select('size status name');
       peopleWithTasks.push({...personWithTasks.toObject(), person_tasks: person_tasks});
     }
     res.json(peopleWithTasks);

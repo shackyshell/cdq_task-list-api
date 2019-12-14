@@ -1,7 +1,7 @@
 'use strict';
 
 
-import {isFibonacci} from "./teskUtils";
+import {greedyMKP, isFibonacci} from "./teskUtils";
 import {getPersonOccupation} from "./personController";
 import * as _ from 'lodash'
 
@@ -95,14 +95,27 @@ exports.delete_a_task = function (req, res) {
   });
 };
 
-exports.shuffle_open_tasks = function (req, res) {
-  Task.find({}, function (err, tasks) {
+exports.shuffle_open_tasks = async function (req, res) {
+  let all_tasks = await Task.find({status: "Open"}, function (err, tasks) {
     if (err)
       res.send(err);
-    //TODO
-    console.log(tasks);
-    res.json(tasks);
   });
+  let all_people = await Person.find({}, function (err, persons) {
+    if (err)
+      res.send(err);
+  });
+  let S = greedyMKP(all_tasks, all_people);
+  for (let i = 0; i < S.length; i++) {
+    // console.log(i);
+    // console.log(S[i]);
+    Task.findOneAndUpdate({_id: S[i]._id}, S[i], {new: true}, function (err, task) {
+      if (err)
+        res.send(err);
+      // res.json(task);
+    });
+  }
+  res.json(S);
+
 };
 
 
