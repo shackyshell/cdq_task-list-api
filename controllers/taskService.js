@@ -96,7 +96,7 @@ export const getLeastOccupiedPerson = async (size) => {
   return chosenPersonOccupation;
 }
 
-
+//TODO refactor
 export const setTaskAssignee = async (new_task, assignee = null) => {
   for (let i = 0; i < 2; i++) {
     let chosenPersonOccupation = await getLeastOccupiedPerson(new_task.size);
@@ -120,6 +120,11 @@ export const setTaskAssignee = async (new_task, assignee = null) => {
 
 export const tryToSetTaskAssignee = async (new_task, assigneeId) => {
   let person = await getPersonById(assigneeId);
+  if (!person) {
+    logger.log({level: 'info', message: 'This person does not exist'});
+    new_task.assignee = null;
+    return;
+  }
   const occupation = await getPersonOccupation(person._id);
   let chosenPersonOccupation = {personId: person._id, occupation};
   for (let i = 0; i < 2; i++) {

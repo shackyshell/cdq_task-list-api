@@ -34,15 +34,26 @@ exports.read_a_person = function (req, res) {
   });
 };
 
-exports.delete_a_person = function (req, res) {
+exports.delete_a_person = async function (req, res) {
+  let person_tasks = await getPersonTasks(req.params.personId);
+  for (let i = 0; i < person_tasks.length; i++) {
+    if (person_tasks[i].status === "In progress") {
+      person_tasks[i].assignee = "Open";
+    }
+    person_tasks[i].assignee = null;
+    await Task.findOneAndUpdate({_id: person_tasks[i].taskId}, person_tasks[i], function (err, task) {
+      if (err)
+        res.send(err);
+    });
+  }
   Person.deleteOne({
     _id: req.params.personId
   }, function (err, person) {
     if (err) res.send(err);
     try {
-      shuffleOpenTasks().then(() => {
-        res.json({message: 'Person successfully deleted'});
-      })
+      // shuffleOpenTasks().then(() => {
+      res.json({message: 'Person successfully deleted'});
+      // })
     } catch (err) {
       logger.log({level: 'error', message: 'shuffle tasks error', error: err});
     }
@@ -88,19 +99,26 @@ export const getPersonUsedCapacity = async (personId) => {
   }, 0);
 };
 
-exports.list_person_tasks = function (req, res) {
-  const personId = req.params.personId;
-  Task.find({assignee: personId}, function (err, tasks) {
-    if (err)
-      res.send(err);
-    let result = {
-      tasks,
-      sum_tasks: tasks.reduce((prvVal, currVal) => {
-        return prvVal + currVal.size
-      }, 0)
-    };
-    res.json(result);
+export const getPersonTasks = async (personId) => {
+  let tasks = await Task.find({assignee: personId}, function (err, tasks) {
+    if (err) throw err;
   });
+  return {
+    tasks,
+    sum_tasks: tasks.reduce((prvVal, currVal) => {
+      return prvVal + currVal.size
+    }, 0)
+  }
+}
+
+exports.list_person_tasks = async function (req, res) {
+  let result = null;
+  try {
+    result = await getPersonTasks(req.params.personId);
+  } catch (err) {
+    logger.log({level: 'error', message: 'Error', error: err})
+  }
+  res.json(result);
 };
 
 export const getPersonOccupation = async (personId) => {
