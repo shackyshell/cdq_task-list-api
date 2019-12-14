@@ -11,7 +11,6 @@ module.exports = function(app) {
 
   app.route('/people/:personId')
     .get(personList.read_a_person)
-    .put(personList.update_a_person)
     .delete(personList.delete_a_person);
 
   app.route('/people/tasks/:personId')

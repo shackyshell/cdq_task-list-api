@@ -29,15 +29,6 @@ exports.read_a_person = function (req, res) {
   });
 };
 
-
-exports.update_a_person = function (req, res) {
-  Person.findOneAndUpdate({_id: req.params.personId}, req.body, {new: true}, function (err, person) {
-    if (err)
-      res.send(err);
-    res.json(person);
-  });
-};
-
 exports.delete_a_person = function (req, res) {
   Person.remove({
     _id: req.params.personId
@@ -102,17 +93,15 @@ exports.list_person_tasks = function (req, res) {
   });
 };
 
-export async function getPersonOccupation(personId) {
+export const getPersonOccupation = async (personId) => {
   let person_occupation = null;
   await Task.find({assignee: personId}, async (err, tasks) => {
-      if (err) {
-        throw SQLException;
-      }
+    if (err) throw SQLException;
     person_occupation = tasks.reduce((prvVal, currVal) => {
         return prvVal + currVal.size
     }, 0)
     }
   );
   return person_occupation;
-}
+};
 

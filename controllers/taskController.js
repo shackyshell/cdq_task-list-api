@@ -11,7 +11,11 @@ const Task = mongoose.model('Task');
 
 
 exports.list_all_tasks = function (req, res) {
-  Task.find({}, function (err, task) {
+  let conditions = {};
+  if (req.query.assignee) conditions.assignee = req.query.assignee;
+  if (req.query.assignee === 'null') conditions.assignee = null;
+  if (req.query.status) conditions.status = req.query.status;
+  Task.find(conditions, function (err, task) {
     if (err)
       res.send(err);
     res.json(task);
@@ -95,14 +99,12 @@ exports.delete_a_task = function (req, res) {
   });
 };
 
-exports.shuffle_open_tasks = async function (req, res) {
+export const shuffleOpenTasks = async () => {
   let all_tasks = await Task.find({status: "Open"}, function (err, tasks) {
-    if (err)
-      res.send(err);
+    if (err) throw err;
   });
   let all_people = await Person.find({}, function (err, persons) {
-    if (err)
-      res.send(err);
+    if (err) throw err;
   });
 
   const all_people_with_last_capacity = [];
@@ -114,12 +116,21 @@ exports.shuffle_open_tasks = async function (req, res) {
   let S = greedyMKP(all_tasks, all_people_with_last_capacity);
   for (let i = 0; i < S.length; i++) {
     Task.findOneAndUpdate({_id: S[i]._id}, S[i], {new: true}, function (err, task) {
-      if (err)
-        res.send(err);
+      if (err) throw err;
     });
   }
-  res.json(S);
+  return S;
 
+};
+
+exports.shuffle_open_tasks = async function (req, res) {
+  let S = [];
+  try {
+    S = await shuffleOpenTasks();
+  } catch (err) {
+    res.send(err)
+  }
+  res.json(S);
 };
 
 
