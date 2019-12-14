@@ -1,7 +1,7 @@
 'use strict';
 
 
-import {isFibonacci, setTaskAssignee, shuffleOpenTasks} from "./teskUtils";
+import {isFibonacci, setTaskAssignee, shuffleOpenTasks, tryToSetTaskAssignee} from "./teskUtils";
 
 const mongoose = require('mongoose');
 const Task = mongoose.model('Task');
@@ -46,14 +46,15 @@ exports.read_a_task = function (req, res) {
     .populate('assignee', 'name');
 };
 
-exports.update_a_task = function (req, res) {
+exports.update_a_task = async function (req, res) {
   const new_task = new Task(req.body);
   const size = new_task.size;
   if (!isFibonacci(size)) {
     res.send('size is not a Fibonacci number');
     return;
   }
-  Task.findOneAndUpdate({_id: req.params.taskId}, req.body, {new: true}, function (err, task) {
+  await tryToSetTaskAssignee(new_task, new_task.assignee);
+  Task.findOneAndUpdate({_id: req.params.taskId}, new_task, {new: true}, function (err, task) {
     if (err)
       res.send(err);
     res.json(task);

@@ -106,7 +106,7 @@ exports.list_person_tasks = function (req, res) {
 export const getPersonOccupation = async (personId) => {
   let person_occupation = null;
   await Task.find({assignee: personId}, async (err, tasks) => {
-    if (err) throw SQLException;
+    if (err) throw err;
     person_occupation = tasks.reduce((prvVal, currVal) => {
         return prvVal + currVal.size
     }, 0)
@@ -115,8 +115,8 @@ export const getPersonOccupation = async (personId) => {
   return person_occupation;
 };
 
-export const getPersonCapacityById = async (personId) => {
+export const getPersonById = async (personId) => {
   return Person.findById(personId, async function (err, persons) {
-  }).select('capacity');
+  })
 };
 
