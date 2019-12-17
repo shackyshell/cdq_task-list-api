@@ -1,7 +1,11 @@
 import {setRoutes} from "./routes";
 import * as dotenv from 'dotenv';
 
-dotenv.config({ path: '.env' });
+if (process.env.NODE_ENV === "test") {
+  dotenv.config({path: `.env.${process.env.NODE_ENV}`});
+} else {
+  dotenv.config({path: `.env`});
+}
 const express = require('express'),
   app = express(),
   port = process.env.PORT || 3000,
@@ -23,3 +27,6 @@ setRoutes(app);
 app.listen(port, () => {
   console.log('Server started on port ' + port)
 });
+
+
+module.exports = app; // for testing
