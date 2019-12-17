@@ -1,11 +1,12 @@
 'use strict';
 
 import {logger} from "../logger";
-import {shuffleOpenTasks} from "./taskController";
+import {PersonSchema} from "../models/personModel";
+import {TaskSchema} from "../models/taskModel";
 
 const mongoose = require('mongoose');
-const Person = mongoose.model('Person');
-const Task = mongoose.model('Task');
+const Person = mongoose.model('Person', PersonSchema);
+const Task = mongoose.model('Task', TaskSchema);
 
 exports.list_all_persons = function (req, res) {
   Person.find({}, function (err, person) {
