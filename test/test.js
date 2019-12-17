@@ -91,6 +91,7 @@ describe('bnb Test', function () {
 
 //During the test the env variable is set to test
 process.env.NODE_ENV = 'test';
+const regeneratorRuntime = require("regenerator-runtime");
 let mongoose = require("mongoose");
 
 //Require the dev-dependencies
@@ -107,9 +108,13 @@ describe('Tasks', () => {
       done();
     });
   });
-  /*
-    * Test the /GET route
-    */
+
+  beforeEach((done) => { //Before each test empty the database
+    Person.remove({}, (err) => {
+      done();
+    });
+  });
+
   describe('/GET tasks', () => {
     it('it should GET all the tasks', (done) => {
       chai.request(server)
@@ -140,6 +145,162 @@ describe('Tasks', () => {
           res.should.have.status(200);
           res.body.should.be.a('object');
           res.body.should.have.property('assignee').that.is.equal(null);
+          done();
+        });
+    });
+  });
+});
+
+
+describe('People', () => {
+  beforeEach((done) => { //Before each test empty the database
+    Task.remove({}, (err) => {
+      done();
+    });
+  });
+
+  beforeEach((done) => { //Before each test empty the database
+    Person.remove({}, (err) => {
+      done();
+    });
+  });
+
+  describe('/POST person', () => {
+    it('it should POST person', function (done) {
+      this.timeout(5000);
+      let task = {
+        "name": "Anna",
+        "capacity": 15
+      };
+
+      chai.request(server)
+        .post('/people')
+        .send(task)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('name').that.is.equal(task.name);
+          res.body.should.have.property('capacity').that.is.equal(task.capacity);
+          done();
+        });
+    });
+  });
+
+  describe('/POST person', () => {
+    it('it should not POST person because of capacity', function (done) {
+      this.timeout(5000);
+      let task = {
+        "name": "Kamil",
+        "capacity": 41
+      };
+
+      chai.request(server)
+        .post('/people')
+        .send(task)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('errors')
+            .that.has.property('capacity')
+            .that.has.property('message').that.is.equal("Too large capacity");
+          done();
+        });
+    });
+  });
+});
+
+
+describe('Search tasks by assignee', () => {
+  before((done) => { //Before each test empty the database
+    Task.remove({}, (err) => {
+      done();
+    });
+  });
+
+  before((done) => { //Before each test empty the database
+    Person.remove({}, (err) => {
+      done();
+    });
+  });
+
+  describe('/POST tasks', () => {
+    it('it should POST task', function (done) {
+      this.timeout(5000);
+      let task = {
+        name: "Zamiatanie podłogi",
+        status: "Open",
+        size: 1,
+        assignee: "abc-123"
+      };
+
+      chai.request(server)
+        .post('/tasks')
+        .send(task)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('assignee').that.is.equal(null);
+          done();
+        });
+    });
+  });
+
+  describe('/GET tasks', () => {
+    it('it should GET all the tasks', (done) => {
+      chai.request(server)
+        .get('/tasks')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('array');
+          res.body.length.should.be.eql(1);
+          done();
+        });
+    });
+  });
+
+
+  describe('/POST person', () => {
+    it('it should POST person', function (done) {
+      this.timeout(5000);
+      let task = {
+        "name": "Katarzyna",
+        "capacity": 40
+      };
+
+      chai.request(server)
+        .post('/people')
+        .send(task)
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('object');
+          res.body.should.have.property('name').that.is.equal(task.name);
+          res.body.should.have.property('capacity').that.is.equal(task.capacity);
+          done();
+        });
+    });
+  });
+
+  describe('/GET people', () => {
+    it('it should GET all the people', (done) => {
+      chai.request(server)
+        .get('/people')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('array');
+          res.body.length.should.be.eql(1);
+          done();
+        });
+    });
+  });
+
+  describe('/GET not assigned tasks', () => {
+    it('it gets not assigned tasks', (done) => {
+      chai.request(server)
+        .get('/tasks?assignee=null')
+        .end((err, res) => {
+          res.should.have.status(200);
+          res.body.should.be.a('array');
+          res.body.length.should.be.eql(1);
           done();
         });
     });
